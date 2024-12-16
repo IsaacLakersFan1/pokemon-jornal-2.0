@@ -30,6 +30,7 @@ const DashboardPage = () => {
   const [events, setEvents] = useState<any[]>([]);
   const gameId = Number(useParams().id); // Extract gameId from URL params
   const token = localStorage.getItem('authToken');
+  const { id } = useParams<{ id: string }>(); // Extract game ID
 
 
   // Fetch players on component mount
@@ -126,15 +127,18 @@ const DashboardPage = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="space-x-4">
-          <Link to="/dashboard" className="btn bg-indigo-600 text-white px-4 py-2 rounded-md">
-            Home
-          </Link>
-          <Link to="/players" className="btn bg-indigo-600 text-white px-4 py-2 rounded-md">
-            Players
-          </Link>
-          <Link to="/games" className="btn bg-indigo-600 text-white px-4 py-2 rounded-md">
-            Games
-          </Link>
+          <Link to={`/games/${id}`} className="btn bg-indigo-600 text-white px-4 py-2 rounded-md">
+              Home
+            </Link>
+            <Link to={`/games/${id}/players`} className="btn bg-indigo-600 text-white px-4 py-2 rounded-md">
+              Players
+            </Link>
+            <Link to="/games" className="btn bg-indigo-600 text-white px-4 py-2 rounded-md">
+              Games
+            </Link>
+            <Link to={`/games/${id}/pokedex`} className="btn bg-indigo-600 text-white px-4 py-2 rounded-md">
+              Pokedex
+            </Link>
         </div>
       </div>
 
@@ -152,22 +156,36 @@ const DashboardPage = () => {
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           {pokemonResults.length > 0 && (
-            <ul className="border mt-2 rounded-md shadow-md max-h-40 overflow-y-auto">
+            <ul className="border mt-2 rounded-md shadow-md max-h-80 overflow-y-auto">
               {pokemonResults.map((pokemon) => (
                 <li
                   key={pokemon.id}
-                  className="p-3 cursor-pointer hover:bg-indigo-100"
+                  className="flex items-center p-3 cursor-pointer hover:bg-indigo-100"
                   onClick={() => {
                     setSelectedPokemon(pokemon);
                     setPokemonQuery('');
                   }}
                 >
-                  {pokemon.name}
+                  {/* Pokémon Image */}
+                  <img
+                    src={`/${pokemon.image}.png` || '/pokeball.png'}
+                    alt={pokemon.name}
+                    className="w-16 h-16 rounded-full mr-3"
+                  />
+
+                  {/* Pokémon Details */}
+                  <div>
+                    <p className="text-lg font-semibold text-gray-800">{pokemon.name}</p>
+                    {pokemon.form && (
+                      <p className="text-sm text-gray-500">{pokemon.form}</p>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
           )}
         </div>
+
         {selectedPokemon && (
           <div className="mb-4">
             <span className="font-semibold text-indigo-700">Selected Pokémon:</span> {selectedPokemon.name}

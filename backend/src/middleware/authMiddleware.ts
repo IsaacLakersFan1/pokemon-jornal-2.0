@@ -22,6 +22,7 @@ export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: 
     (req as AuthenticatedRequest).user = decoded;  // Use type assertion to add `user` to `req`
     next();  // Proceed to the next middleware or route handler
   } catch (error) {
+    console.log(error)
     res.status(400).json({ error: 'Invalid or expired token' });
     return;  // Ensure no further execution happens
   }

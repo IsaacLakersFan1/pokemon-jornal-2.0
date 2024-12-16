@@ -51,7 +51,7 @@ model Player {
 model Pokemon {
   id             Int      @id @default(autoincrement())
   nationalDex    Int
-  name           String?
+  name           String
   form           String? // Optional for different forms like Alolan
   type1          String
   type2          String?

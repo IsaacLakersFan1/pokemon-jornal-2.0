@@ -41,22 +41,27 @@ export const searchPokemon = async (req: Request, res: Response): Promise<void> 
     if (typeof searchTerm === 'string') {
       const pokemons = await prisma.pokemon.findMany({
         where: {
-          name: {
-            contains: searchTerm.toLowerCase(), // Ensure it's a string
-            // If needed, you can also use mode: 'insensitive' here
-          },
+          name: { contains: searchTerm.toLowerCase()  }, // Case-insensitive search
+        },
+        select: {
+          id: true,
+          name: true,
+          form: true,
+          image: true,
         },
       });
+      
+
       res.json(pokemons);
     } else {
-      console.log(error)
       res.status(400).json({ error: 'Invalid search term' });
     }
-    
   } catch (error) {
+    console.error('Error searching Pokémon:', error);
     res.status(500).json({ error: 'Failed to search Pokémon' });
   }
 };
+
 
 // Get all events (you can also filter by gameId or other criteria)
 export const getAllEvents = async (req: Request, res: Response): Promise<void> => {

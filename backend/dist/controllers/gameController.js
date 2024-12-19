@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteGame = exports.createGame = void 0;
+exports.getAllGames = exports.deleteGame = exports.createGame = void 0;
 const prismaClient_1 = __importDefault(require("../prismaClient"));
 // Create a new game
 const createGame = async (req, res) => {
@@ -24,6 +24,7 @@ const createGame = async (req, res) => {
         res.status(201).json({ message: 'Game created successfully', game: newGame });
     }
     catch (error) {
+        console.log(error);
         res.status(500).json({ error: 'Failed to create game' });
     }
 };
@@ -60,3 +61,28 @@ const deleteGame = async (req, res) => {
     }
 };
 exports.deleteGame = deleteGame;
+// Get all games for the authenticated user
+const getAllGames = async (req, res) => {
+    const userId = req.user?.userId; // Access the userId from the JWT payload
+    if (!userId) {
+        res.status(400).json({ error: 'User not authenticated' });
+        return;
+    }
+    try {
+        // Fetch all games for the authenticated user
+        const games = await prismaClient_1.default.game.findMany({
+            where: {
+                userId, // Filter games by the user's ID
+            },
+        });
+        if (games.length === 0) {
+            res.status(404).json({ message: 'No games found for this user' });
+            return;
+        }
+        res.status(200).json({ games });
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Failed to fetch games' });
+    }
+};
+exports.getAllGames = getAllGames;

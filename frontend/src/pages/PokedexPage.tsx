@@ -46,26 +46,6 @@ const getTypeColor = (type: string): string => {
   return typeColors[type] || "#A8A8A8"; // Default gray
 };
 
-const TYPE_COLORS = {
-  Bug: "#A8B820",
-  Dark: "#705848",
-  Dragon: "#6F35FC",
-  Electric: "#F8D030",
-  Fairy: "#F7A5D4",
-  Fighting: "#C03028",
-  Fire: "#F08030",
-  Flying: "#A890F0",
-  Ghost: "#705898",
-  Grass: "#78C850",
-  Ground: "#E0C068",
-  Ice: "#98D8D8",
-  Normal: "#A8A878",
-  Poison: "#A040A0",
-  Psychic: "#F85888",
-  Rock: "#B8A038",
-  Steel: "#B8B8D0",
-  Water: "#6890F0",
-};
 
 const PokedexPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -362,6 +342,7 @@ const PokedexPage: React.FC = () => {
             >
               Cancel
             </button>
+            <button onClick={() => setImageFile(null)}>Image</button>
           </div>
         </div>
       )}

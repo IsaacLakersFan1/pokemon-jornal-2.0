@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import API_BASE_URL from '../apiConfig';
 
 const GamesPage = () => {
   const [games, setGames] = useState<any[]>([]);
@@ -10,7 +11,7 @@ const GamesPage = () => {
   useEffect(() => {
     if (token) {
       axios
-        .get('http://localhost:3000/games/games', {
+        .get(`${API_BASE_URL}/games/games`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => setGames(response.data.games))
@@ -23,7 +24,7 @@ const GamesPage = () => {
   const handleDelete = (gameId: number) => {
     if (token) {
       axios
-        .delete(`http://localhost:3000/games/${gameId}`, {
+        .delete(`${API_BASE_URL}/games/${gameId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then(() => {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import API_BASE_URL from '../apiConfig';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -11,7 +12,7 @@ const LoginPage = () => {
   const handleLogin = async () => {
     try {
       // Use the new endpoint for login
-      const response = await axios.post('http://localhost:3000/auth/login', { email, password });
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
 
       if (response.data.token) {
         // Assuming the backend returns a token for authentication

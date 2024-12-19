@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import PokemonCard from '../components/PokemonCard'; // Adjust the import path
+import API_BASE_URL from "../apiConfig";
 
 // Define the structure of stats and types
 interface TypeCounts {
@@ -39,7 +40,7 @@ const PlayerStatsPage: React.FC = () => {
   useEffect(() => {
     // Fetch overall player stats
     axios
-      .get(`http://localhost:3000/players/stats/${playerId}`, {
+      .get(`${API_BASE_URL}/players/stats/${playerId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then((response) => {
@@ -53,7 +54,7 @@ const PlayerStatsPage: React.FC = () => {
 
     // Fetch Pokémon-specific stats
     axios
-      .get(`http://localhost:3000/players/stats/pokemon/${playerId}`, {
+      .get(`${API_BASE_URL}/players/stats/pokemon/${playerId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then((response) => {

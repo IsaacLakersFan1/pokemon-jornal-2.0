@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { FaInfoCircle, FaEdit, FaPlus } from "react-icons/fa";
+import API_BASE_URL from "../apiConfig";
 
 interface Pokemon {
   id: number;
@@ -66,7 +67,7 @@ const PokedexPage: React.FC = () => {
   useEffect(() => {
     const fetchPokemons = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/pokemons/pokemon");
+        const response = await axios.get(`${API_BASE_URL}/pokemons/pokemon`);
         setPokemons(response.data.pokemons);
         setFilteredPokemons(response.data.pokemons);
       } catch (error) {
@@ -86,7 +87,7 @@ const PokedexPage: React.FC = () => {
     } else {
       try {
         const response = await axios.get(
-          `http://localhost:3000/events/pokemon/search?searchTerm=${value}`,
+          `${API_BASE_URL}/events/pokemon/search?searchTerm=${value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -129,7 +130,7 @@ const PokedexPage: React.FC = () => {
     const payload = { ...newPokemon, image, shinyImage };
 
     try {
-      await axios.post("http://localhost:3000/pokemons/pokemon", payload, {
+      await axios.post(`${API_BASE_URL}/pokemons/pokemon`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -156,7 +157,7 @@ const PokedexPage: React.FC = () => {
 
     try {
       await axios.put(
-        `http://localhost:3000/pokemons/pokemon/${editedPokemon.id}`,
+        `${API_BASE_URL}/pokemons/pokemon/${editedPokemon.id}`,
         formData,
         {
           headers: {

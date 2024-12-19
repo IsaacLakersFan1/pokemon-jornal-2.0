@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FaCrown, FaStar, FaRunning, FaSkull, FaCheck } from 'react-icons/fa';
+import API_BASE_URL from '../apiConfig';
 
 interface EventCardProps {
   eventId: number;
@@ -72,7 +73,7 @@ const EventCard: React.FC<EventCardProps> = ({
   const handleStatusChange = async (newStatus: string) => {
     try {
       await axios.patch(
-        `http://localhost:3000/events/event/${eventId}/status`,
+        `${API_BASE_URL}/events/event/${eventId}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -85,7 +86,7 @@ const EventCard: React.FC<EventCardProps> = ({
   const toggleAttribute = async (attribute: 'isShiny' | 'isChamp', value: number) => {
     try {
       await axios.put(
-        `http://localhost:3000/events/events/${eventId}/attributes`,
+        `${API_BASE_URL}/events/events/${eventId}/attributes`,
         {
           [attribute]: value,
           isShiny: attribute === 'isShiny' ? value : shiny,

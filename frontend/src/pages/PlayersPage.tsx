@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 
 interface Player {
   id: number;
@@ -28,7 +29,7 @@ const PlayersPage: React.FC = () => {
             throw new Error('Unauthorized: Token not found');
           }
       
-          const response = await axios.get(`http://localhost:3000/api/player-games/${gameId}`, {
+          const response = await axios.get(`${API_BASE_URL}/api/player-games/${gameId}`, {
             headers: {
               'Authorization': `Bearer ${token}`, // Add token to headers
             },

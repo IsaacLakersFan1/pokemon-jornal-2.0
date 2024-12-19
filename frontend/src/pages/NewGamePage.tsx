@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import API_BASE_URL from '../apiConfig';
 
 const NewGamePage = () => {
   const [gameName, setGameName] = useState('');
@@ -26,7 +27,7 @@ const NewGamePage = () => {
 
   const fetchPlayers = () => {
     axios
-      .get('http://localhost:3000/players', {
+      .get(`${API_BASE_URL}/players`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => setPlayers(response.data))
@@ -39,7 +40,7 @@ const NewGamePage = () => {
       return;
     }
     axios
-      .get(`http://localhost:3000/events/pokemon/search?searchTerm=${search}`, {
+      .get(`${API_BASE_URL}/events/pokemon/search?searchTerm=${search}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => setPokemons(response.data))
@@ -63,7 +64,7 @@ const NewGamePage = () => {
     if (newPlayerName.trim() && pokemonId && token) {
       try {
         await axios.post(
-          'http://localhost:3000/players',
+          `${API_BASE_URL}/players`,
           { name: newPlayerName, pokemonId },
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -100,7 +101,7 @@ const NewGamePage = () => {
 
     try {
       const gameResponse = await axios.post(
-        'http://localhost:3000/games',
+        `${API_BASE_URL}/games`,
         {
           name: gameName,
           playerCount: selectedPlayers.length,
@@ -114,7 +115,7 @@ const NewGamePage = () => {
 
       const playerGamePromises = selectedPlayers.map((playerId) =>
         axios.post(
-          'http://localhost:3000/api/player-games',
+          `${API_BASE_URL}/api/player-games`,
           { playerId, gameId },
           {
             headers: { Authorization: `Bearer ${token}` },

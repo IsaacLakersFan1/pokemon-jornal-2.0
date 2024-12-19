@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import EventCard from '../components/EventCard';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
-
+import API_BASE_URL from '../apiConfig';
 
 // Define the type for the player-game response
 interface PlayerGameResponse {
@@ -40,7 +40,7 @@ const DashboardPage = () => {
   useEffect(() => {
     if (token && gameId) {
       axios
-        .get<{ players: PlayerGameResponse[] }>(`http://localhost:3000/api/player-games/${gameId}`, {
+        .get<{ players: PlayerGameResponse[] }>(`${API_BASE_URL}/api/player-games/${gameId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -57,7 +57,7 @@ const DashboardPage = () => {
   useEffect(() => {
     if (pokemonQuery.length >= 3 && token) {
       axios
-        .get(`http://localhost:3000/events/pokemon/search?searchTerm=${pokemonQuery}`, {
+        .get(`${API_BASE_URL}/events/pokemon/search?searchTerm=${pokemonQuery}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => setPokemonResults(response.data))
@@ -78,7 +78,7 @@ const DashboardPage = () => {
     setIsSubmitting(true);
     try {
       await axios.post(
-        'http://localhost:3000/events/event',
+        `${API_BASE_URL}/events/event`,
         {
           pokemonId: selectedPokemon.id,
           pokemonImage: selectedPokemon.image, // Include the Pokémon image
@@ -111,7 +111,7 @@ const DashboardPage = () => {
   useEffect(() => {
     if (token && gameId) {
       axios
-        .get(`http://localhost:3000/events/events?gameId=${gameId}`, {
+        .get(`${API_BASE_URL}/events/events?gameId=${gameId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => setEvents(response.data.events))

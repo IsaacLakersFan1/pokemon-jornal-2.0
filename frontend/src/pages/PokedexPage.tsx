@@ -67,7 +67,6 @@ const TYPE_COLORS = {
   Water: "#6890F0",
 };
 
-
 const PokedexPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
@@ -77,10 +76,9 @@ const PokedexPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [newPokemon, setNewPokemon] = useState<any>({});
-  const [editedPokemon, setEditedPokemon] = useState({});
-  const [imageFile, setImageFile] = useState(null);
+  const [editedPokemon, setEditedPokemon] = useState<any>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-
 
   const token = localStorage.getItem("authToken");
 
@@ -165,17 +163,17 @@ const PokedexPage: React.FC = () => {
 
   const handleUpdatePokemon = async () => {
     const formData = new FormData();
-    
+
     // Append updated fields
     for (const key in editedPokemon) {
       formData.append(key, editedPokemon[key]);
     }
-    
+
     // Append image if selected
     if (imageFile) {
       formData.append("image", imageFile);
     }
-    
+
     try {
       await axios.put(
         `http://localhost:3000/pokemons/pokemon/${editedPokemon.id}`,
@@ -194,8 +192,6 @@ const PokedexPage: React.FC = () => {
       console.error("Error updating Pokémon:", error);
     }
   };
-  
-  
 
   return (
     <div className="container mx-auto p-4">
@@ -259,216 +255,116 @@ const PokedexPage: React.FC = () => {
                 </span>
               )}
             </div>
-            <div className="flex justify-center gap-2 mt-4">
-              <button
-                className="bg-blue-500 text-white p-2 rounded-md"
-                onClick={() => openModal(pokemon)}
-              >
-                <FaInfoCircle size={20} />
-              </button>
-              <button
-                className="bg-yellow-500 text-white p-2 rounded-md"
-                onClick={() => {
-                  setEditedPokemon(pokemon); // Populate edit form
-                  setImageFile(null); // Reset image input
-                  setIsEditModalOpen(true);
-                }}
-              >
-                <FaEdit size={20} />
-              </button>
-            </div>
+            <button
+              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md"
+              onClick={() => openModal(pokemon)}
+            >
+              <FaInfoCircle className="inline-block mr-2" /> More Info
+            </button>
           </div>
         ))}
       </div>
 
-    {/* Create Pokémon Modal */}
-    {isCreateModalOpen && (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-2xl mb-4">Create Pokémon</h2>
-          {/* National Dex Number */}
-          <input
-            type="number"
-            placeholder="National Dex"
-            onChange={(e) => setNewPokemon({ ...newPokemon, nationalDex: parseInt(e.target.value) || 0 })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          {/* Name */}
-          <input
-            type="text"
-            placeholder="Name"
-            onChange={(e) => setNewPokemon({ ...newPokemon, name: e.target.value })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          {/* Form */}
-          <input
-            type="text"
-            placeholder="Form (Optional)"
-            onChange={(e) => setNewPokemon({ ...newPokemon, form: e.target.value })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          {/* Type 1 */}
-          <select
-            onChange={(e) => setNewPokemon({ ...newPokemon, type1: e.target.value })}
-            className="w-full p-2 border rounded-md mb-4"
-            defaultValue=""
-          >
-            <option value="" disabled>
-              Select Type 1
-            </option>
-            {Object.keys(TYPE_COLORS).map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          {/* Type 2 */}
-          <select
-            onChange={(e) => setNewPokemon({ ...newPokemon, type2: e.target.value })}
-            className="w-full p-2 border rounded-md mb-4"
-            defaultValue=""
-          >
-            <option value="" disabled>
-              Select Type 2 (Optional)
-            </option>
-            {Object.keys(TYPE_COLORS).map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          {/* Total Stats */}
-          <input
-            type="number"
-            placeholder="Total Stats"
-            onChange={(e) => setNewPokemon({ ...newPokemon, total: parseInt(e.target.value) })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          {/* Individual Stats */}
-          <input
-            type="number"
-            placeholder="HP"
-            onChange={(e) => setNewPokemon({ ...newPokemon, hp: parseInt(e.target.value)  })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          <input
-            type="number"
-            placeholder="Attack"
-            onChange={(e) => setNewPokemon({ ...newPokemon, attack: parseInt(e.target.value)  })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          <input
-            type="number"
-            placeholder="Defense"
-            onChange={(e) => setNewPokemon({ ...newPokemon, defense: parseInt(e.target.value)  })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          <input
-            type="number"
-            placeholder="Special Attack"
-            onChange={(e) => setNewPokemon({ ...newPokemon, specialAttack: parseInt(e.target.value)  })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          <input
-            type="number"
-            placeholder="Special Defense"
-            onChange={(e) => setNewPokemon({ ...newPokemon, specialDefense: parseInt(e.target.value)  })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          <input
-            type="number"
-            placeholder="Speed"
-            onChange={(e) => setNewPokemon({ ...newPokemon, speed: parseInt(e.target.value)  })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          {/* Generation */}
-          <input
-            type="number"
-            placeholder="Generation"
-            onChange={(e) => setNewPokemon({ ...newPokemon, generation: parseInt(e.target.value)  })}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-          {/* Buttons */}
-          <button
-            onClick={handleCreatePokemon}
-            className="bg-green-500 text-white px-4 py-2 rounded-md w-full"
-          >
-            Create
-          </button>
-          <button
-            onClick={closeCreateModal}
-            className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md w-full"
-          >
-            Cancel
-          </button>
+      {/* Pokémon Details Modal */}
+      {isModalOpen && selectedPokemon && (
+        <div className="modal fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h2 className="text-2xl font-bold">{selectedPokemon.name}</h2>
+            <div className="mt-4">
+              <img
+                src={`/${selectedPokemon.image}.png`}
+                alt={selectedPokemon.name}
+                className="w-48 h-48 mx-auto mb-4"
+              />
+              <p>Type: {selectedPokemon.type1}</p>
+              {selectedPokemon.type2 && <p>Secondary Type: {selectedPokemon.type2}</p>}
+              <p>HP: {selectedPokemon.hp}</p>
+              <p>Attack: {selectedPokemon.attack}</p>
+              <p>Defense: {selectedPokemon.defense}</p>
+              <p>Special Attack: {selectedPokemon.specialAttack}</p>
+              <p>Special Defense: {selectedPokemon.specialDefense}</p>
+              <p>Speed: {selectedPokemon.speed}</p>
+              <p>Generation: {selectedPokemon.generation}</p>
+            </div>
+            <div className="mt-4 flex justify-between">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded-md"
+                onClick={closeModal}
+              >
+                Close
+              </button>
+              <button
+                className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                onClick={() => setIsEditModalOpen(true)}
+              >
+                <FaEdit /> Edit
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
-    {/* Edit Modal */}
-    {isEditModalOpen && (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-2xl mb-4">Edit Pokémon</h2>
-
-          {/* Name */}
-          <input
-            type="text"
-            value={editedPokemon.name || ""}
-            onChange={(e) => setEditedPokemon({ ...editedPokemon, name: e.target.value })}
-            className="w-full p-2 border rounded-md mb-4"
-            placeholder="Name"
-          />
-
-          {/* Form */}
-          <input
-            type="text"
-            value={editedPokemon.form || ""}
-            onChange={(e) => setEditedPokemon({ ...editedPokemon, form: e.target.value })}
-            className="w-full p-2 border rounded-md mb-4"
-            placeholder="Form (Optional)"
-          />
-
-          {/* Type 1 */}
-          <select
-            value={editedPokemon.type1 || ""}
-            onChange={(e) => setEditedPokemon({ ...editedPokemon, type1: e.target.value })}
-            className="w-full p-2 border rounded-md mb-4"
-          >
-            <option value="" disabled>Select Type 1</option>
-            {Object.keys(TYPE_COLORS).map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-
-          {/* Image Upload */}
-          <input
-            type="file"
-            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-            className="w-full p-2 border rounded-md mb-4"
-          />
-
-          {/* Buttons */}
-          <div className="flex justify-end space-x-4">
+      {/* Create Pokémon Modal */}
+      {isCreateModalOpen && (
+        <div className="modal fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h2 className="text-2xl font-bold">Create New Pokémon</h2>
+            <input
+              type="text"
+              placeholder="Name"
+              value={newPokemon.name}
+              onChange={(e) =>
+                setNewPokemon({ ...newPokemon, name: e.target.value })
+              }
+              className="w-full p-2 mb-4 border rounded-md"
+            />
+            {/* Add form fields for other attributes of new Pokémon here */}
             <button
-              onClick={() => setIsEditModalOpen(false)}
-              className="bg-gray-400 text-white px-4 py-2 rounded-md"
+              onClick={handleCreatePokemon}
+              className="bg-green-500 text-white px-4 py-2 rounded-md"
+            >
+              Create
+            </button>
+            <button
+              onClick={closeCreateModal}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md mt-2"
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Pokémon Modal */}
+      {isEditModalOpen && selectedPokemon && (
+        <div className="modal fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h2 className="text-2xl font-bold">Edit Pokémon</h2>
+            <input
+              type="text"
+              placeholder="Name"
+              value={editedPokemon.name || selectedPokemon.name}
+              onChange={(e) =>
+                setEditedPokemon({ ...editedPokemon, name: e.target.value })
+              }
+              className="w-full p-2 mb-4 border rounded-md"
+            />
+            {/* Add other fields to edit */}
             <button
               onClick={handleUpdatePokemon}
               className="bg-blue-500 text-white px-4 py-2 rounded-md"
             >
-              Save
+              Update
+            </button>
+            <button
+              onClick={() => setIsEditModalOpen(false)}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md mt-2"
+            >
+              Cancel
             </button>
           </div>
         </div>
-      </div>
-    )}
-
-
-
+      )}
     </div>
   );
 };

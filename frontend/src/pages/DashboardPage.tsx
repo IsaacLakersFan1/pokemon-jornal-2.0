@@ -3,6 +3,9 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import EventCard from '../components/EventCard';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 // Define the type for the player-game response
 interface PlayerGameResponse {
@@ -68,25 +71,26 @@ const DashboardPage = () => {
   // Submit the event
   const handleCreateEvent = async () => {
     if (!selectedPokemon || !route || !nickname || !selectedPlayerId) {
-      alert('Please fill in all fields!');
+      toast.error('Please fill in all fields!');
       return;
     }
-
+  
     setIsSubmitting(true);
     try {
       await axios.post(
         'http://localhost:3000/events/event',
         {
           pokemonId: selectedPokemon.id,
+          pokemonImage: selectedPokemon.image, // Include the Pokémon image
           route,
           nickname,
-          playerId: selectedPlayerId, // Include the playerId in the event data
+          playerId: selectedPlayerId,
           status,
           gameId,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Event created successfully!');
+      toast.success('Event created successfully!');
       // Reset fields after submission
       setSelectedPokemon(null);
       setPokemonQuery('');
@@ -96,11 +100,12 @@ const DashboardPage = () => {
       setStatus('Catched');
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Failed to create the event!');
+      toast.error('Failed to create the event!');
     } finally {
       setIsSubmitting(false);
     }
   };
+  
 
   // Fetch events for the current game
   useEffect(() => {
@@ -124,6 +129,7 @@ const DashboardPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="space-x-4">
@@ -152,7 +158,7 @@ const DashboardPage = () => {
             type="text"
             value={pokemonQuery}
             onChange={(e) => setPokemonQuery(e.target.value)}
-            placeholder="Type 3+ letters to search..."
+            placeholder="Type your pokemon name"
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           {pokemonResults.length > 0 && (
@@ -168,7 +174,7 @@ const DashboardPage = () => {
                 >
                   {/* Pokémon Image */}
                   <img
-                    src={`/${pokemon.image}.png` || '/pokeball.png'}
+                    src={`/${pokemon.image}.png` || 'pokeball.png'}
                     alt={pokemon.name}
                     className="w-16 h-16 rounded-full mr-3"
                   />
@@ -186,11 +192,21 @@ const DashboardPage = () => {
           )}
         </div>
 
+        {/* Pokémon Selected */}
         {selectedPokemon && (
-          <div className="mb-4">
-            <span className="font-semibold text-indigo-700">Selected Pokémon:</span> {selectedPokemon.name}
+          <div className="mb-4 flex">
+            <span className="font-semibold text-2xl text-indigo-700">Selected Pokémon:</span> 
+            <div>
+              <p className='mx-6 text-2xl'>{selectedPokemon.name}</p>
+              <img
+                src={`/${selectedPokemon.image}.png` || '/pokeball.png'}
+                alt={selectedPokemon.name}
+                className="w-24 h-24 rounded-full my-4 mx-8"
+              />
+            </div>
           </div>
         )}
+
 
         {/* Zone Input */}
         <div className="mb-4">
@@ -234,19 +250,7 @@ const DashboardPage = () => {
         </div>
 
 
-        {/* Status Selection */}
-        <div className="mb-4">
-          <label className="block font-semibold text-gray-700 mb-2">Status</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="Catched">Catched</option>
-            <option value="Run Away">Run Away</option>
-            <option value="Defeated">Defeated</option>
-          </select>
-        </div>
+
 
         {/* Submit Button */}
         <div className="text-center">
@@ -265,7 +269,7 @@ const DashboardPage = () => {
       {/* Display Events */}
           <div className="mt-8">
             <h2 className="text-2xl font-semibold mb-4">Game Events</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
               {Object.keys(eventsByPlayer).map((playerId) => (
                 <div key={playerId}>
                   <h3 className="text-xl font-semibold text-indigo-600 mb-2">
@@ -285,6 +289,8 @@ const DashboardPage = () => {
                         status={event.status}
                         isShiny={event.isShiny}
                         isChamp={event.isChamp}
+                        route={event.route}
+                        form={event.pokemon.form}
                       />
                     ))}
                   </div>

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/Login';
+import Signup from './pages/Signup';
 import GamesPage from './pages/GamesPage';
 import NewGamePage from './pages/NewGamePage';
 import DashboardPage from './pages/DashboardPage';
@@ -15,6 +16,8 @@ function App() {
       <Routes>
         {/* Login Route */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<Signup />} />
+
 
         {/* Protected Routes */}
         <Route

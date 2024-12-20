@@ -7,9 +7,9 @@ commands = [
 ]
 
 [phases.start]
-dependsOn = ["build"]  # Ensures 'build' phase completes before starting the app
+dependsOn = ["build"]
 commands = [
-  "cd backend && npm run start",
+  "cd backend && npm run start &",  # Run backend in the background
   "cd frontend && npm run preview -- --port 5173"
 ]
 

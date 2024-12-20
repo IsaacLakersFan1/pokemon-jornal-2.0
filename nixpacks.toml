@@ -13,6 +13,7 @@ commands = [
 
 # Specify the ports if needed
 [variables]
-PORT = "3000" # Change to your backend's port if necessary
+PORT = "3000"
 
-providers = ["nodejs"]
+# Explicitly set the provider
+providers = "nodejs"

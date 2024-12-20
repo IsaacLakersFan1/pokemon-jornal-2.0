@@ -1,16 +1,15 @@
-[provider]
-type = "node"
+providers = ["node"]
 
 [phases.build]
 commands = [
-  "cd backend && npm install && npm run build",
-  "cd frontend && npm install && npm run build"
+  "cd backend && pnpm run build",
+  "cd frontend && pnpm run build"
 ]
 
 [phases.start]
 commands = [
-  "cd backend && npm run start",
-  "cd frontend && npm run preview -- --port 5173"
+  "cd backend && pnpm run start",
+  "cd frontend && pnpm run preview -- --port 5173"
 ]
 
 [variables]

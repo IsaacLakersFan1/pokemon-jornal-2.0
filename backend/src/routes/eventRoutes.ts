@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createEvent, searchPokemon, getAllEvents, getEventsByGameId, updateEventStatus, updateEventAttributes } from '../controllers/eventController';
+import { createEvent, searchPokemon, getAllEvents, getEventsByGameId, updateEventStatus, updateEventAttributes, deleteEvent } from '../controllers/eventController';
 import { authenticateJWT } from '../middleware/authMiddleware';
 
 const router = Router();
@@ -20,6 +20,9 @@ router.get('/events/game/:gameId',authenticateJWT, getEventsByGameId);
 router.patch('/event/:eventId/status', authenticateJWT, updateEventStatus);
 
 // PUT route for updating isShiny and isChamp
-router.put('/events/:eventId/attributes', updateEventAttributes);
+router.put('/events/:eventId/attributes',authenticateJWT, updateEventAttributes);
+
+// PUT route for updating isShiny and isChamp
+router.delete('/:eventId/',authenticateJWT, deleteEvent);
 
 export default router;

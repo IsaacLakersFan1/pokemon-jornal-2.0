@@ -208,13 +208,6 @@ export const getPokemonsStats = async (req: Request, res: Response): Promise<voi
   try {
     // Fetch all Pokémon with their events (and shiny status) for the given playerId
     const pokemons = await prisma.pokemon.findMany({
-      where: {
-        events: {
-          some: {
-            playerId: playerId, // Filter events by playerId
-          },
-        },
-      },
       include: {
         events: {
           where: {
@@ -252,6 +245,7 @@ export const getPokemonsStats = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ message: 'An error occurred while fetching Pokémon stats.' });
   }
 };
+
 
 
 

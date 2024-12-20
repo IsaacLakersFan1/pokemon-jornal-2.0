@@ -163,3 +163,30 @@ export const updateEventAttributes = async (req: Request, res: Response): Promis
     });
   }
 };
+
+// Delete Event by ID
+export const deleteEvent = async (req: Request, res: Response): Promise<void> => {
+  const { eventId } = req.params; // Extract eventId from URL parameter
+
+  try {
+    // Find the event to ensure it exists
+    const event = await prisma.event.findUnique({
+      where: { id: parseInt(eventId) },
+    });
+
+    if (!event) {
+      res.status(404).json({ message: 'Event not found.' });
+      return;
+    }
+
+    // Delete the event
+    await prisma.event.delete({
+      where: { id: parseInt(eventId) },
+    });
+
+    res.status(200).json({ message: 'Event successfully deleted.' });
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({ message: 'An error occurred while deleting the event.' });
+  }
+};

@@ -1,4 +1,6 @@
-# Specify build and run commands for backend and frontend separately
+[provider]
+type = "node"
+
 [phases.build]
 commands = [
   "cd backend && npm install && npm run build",
@@ -11,10 +13,5 @@ commands = [
   "cd frontend && npm run preview -- --port 5173"
 ]
 
-# Specify the ports if needed
 [variables]
 PORT = "3000"
-
-# Explicitly set the provider
-[provider]
-type = "node"

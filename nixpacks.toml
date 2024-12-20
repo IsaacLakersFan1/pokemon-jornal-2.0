@@ -16,4 +16,4 @@ commands = [
 PORT = "3000"
 
 # Explicitly set the provider
-providers = "nodejs"
+providers = "node"

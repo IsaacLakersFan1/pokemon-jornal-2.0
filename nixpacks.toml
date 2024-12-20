@@ -16,4 +16,5 @@ commands = [
 PORT = "3000"
 
 # Explicitly set the provider
-providers = ["node"]
+[provider]
+type = "node"

@@ -12,8 +12,8 @@ interface TypeCounts {
 interface PlayerStats {
   playerName: string;
   caught: number;
-  failed: number;
-  fainted: number;
+  runaway: number;
+  defeated: number;
   shiny: number;
   typeCounts: TypeCounts;
 }
@@ -118,8 +118,8 @@ const PlayerStatsPage: React.FC = () => {
         <h2 className="text-xl font-semibold">STATS</h2>
         <div className="mt-4 space-y-2">
           {[{ label: '🛒 Caught', value: stats.caught },
-            { label: '❌ Failed', value: stats.failed },
-            { label: '💔 Fainted', value: stats.fainted },
+            { label: '❌ Run Away', value: stats.runaway },
+            { label: '💔 Defeated', value: stats.defeated },
             { label: '✨ Shiny', value: stats.shiny }
           ].map((stat, idx) => (
             <div key={idx} className="flex items-center">

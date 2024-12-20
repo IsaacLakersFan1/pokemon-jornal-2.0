@@ -10,7 +10,7 @@ commands = [
 dependsOn = ["build"]
 commands = [
   "cd backend && npm run start &",  # Run backend in the background
-  "cd frontend && npm run preview -- --port 5173"
+  "cd frontend && npm run preview -- --port 5173 &"
 ]
 
 [variables]

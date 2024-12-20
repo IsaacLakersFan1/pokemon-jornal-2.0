@@ -9,8 +9,8 @@ commands = [
 [phases.start]
 dependsOn = ["build"]
 commands = [
-  "cd backend && npm run start &",  # Run backend in the background
-  "cd frontend && npm run preview -- --port 5173 &"
+  "cd backend && npm run start &",    # Run backend in the background
+  "cd frontend && npm run preview -- --port 5173"   # No background for frontend; keep it running as expected
 ]
 
 [variables]

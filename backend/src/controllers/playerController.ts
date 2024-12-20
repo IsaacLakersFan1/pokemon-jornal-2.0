@@ -203,11 +203,23 @@ export const getTrainerStats = async (req: Request, res: Response): Promise<void
 
 // Trainer Stats by Pokémon
 export const getPokemonsStats = async (req: Request, res: Response): Promise<void> => {
+  const playerId = parseInt(req.params.playerId); // Get playerId from URL parameter
+
   try {
-    // Fetch all Pokémon with their events (and shiny status) from the database
+    // Fetch all Pokémon with their events (and shiny status) for the given playerId
     const pokemons = await prisma.pokemon.findMany({
+      where: {
+        events: {
+          some: {
+            playerId: playerId, // Filter events by playerId
+          },
+        },
+      },
       include: {
         events: {
+          where: {
+            playerId: playerId, // Only include events for the given playerId
+          },
           select: {
             isShiny: true, // Select shiny status
           },
@@ -240,6 +252,7 @@ export const getPokemonsStats = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ message: 'An error occurred while fetching Pokémon stats.' });
   }
 };
+
 
 
 

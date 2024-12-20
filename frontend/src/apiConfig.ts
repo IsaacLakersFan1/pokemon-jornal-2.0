@@ -1,3 +1,3 @@
 // src/apiConfig.ts
-const API_BASE_URL = "http://193.46.198.43";
+const API_BASE_URL = "http://localhost:3000";
 export default API_BASE_URL;

@@ -18,11 +18,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors({
-  origin: 'http://193.46.198.43',  // Frontend's IP or domain
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify methods if needed
-  allowedHeaders: ['Content-Type', 'Authorization']  // Allow specific headers
-}));
+app.use(cors(
+//   {
+//   origin: 'http://localhost:3000',  // Frontend's IP or domain
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify methods if needed
+//   allowedHeaders: ['Content-Type', 'Authorization']  // Allow specific headers
+// }
+));
 
 app.use(bodyParser.json());
 

@@ -2,8 +2,8 @@ providers = ["node"]
 
 [phases.build]
 commands = [
-  "cd backend && npm run build",
-  "cd frontend && npm run build"
+  "cd backend && npm install && npm run build",
+  "cd frontend && npm install && npm run build"
 ]
 
 [phases.start]

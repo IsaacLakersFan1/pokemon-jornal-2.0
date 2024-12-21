@@ -6,5 +6,7 @@ start = "npm start"
 [frontend]
 working_directory = "frontend"
 build = "npm install && npm run build"
-# Remove the start command if using Coolify's static site option
-start = "npx serve -s dist"
+start = "npx serve -s dist"  # Optional if Coolify serves static files
+
+[general]
+framework = "node"  # Specify the framework explicitly (e.g., Node.js for backend/frontend)

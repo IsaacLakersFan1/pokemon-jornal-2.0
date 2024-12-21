@@ -16,6 +16,7 @@ const PokedexPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+  const [typeEffectiveness, setTypeEffectiveness] = useState<{ [key: string]: number }>({});
   const [modalState, setModalState] = useState({
     info: false,
     create: false,
@@ -50,7 +51,7 @@ const PokedexPage: React.FC = () => {
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            }
+            },
           }
         );
         setFilteredPokemons(response.data);
@@ -61,13 +62,29 @@ const PokedexPage: React.FC = () => {
   };
 
   // Modal Handlers
-  const openModal = (type: "info" | "create" | "edit", pokemon?: Pokemon) => {
-    if (pokemon) setSelectedPokemon(pokemon);
+  const openModal = async (type: "info" | "create" | "edit", pokemon?: Pokemon) => {
+    if (type === "info" && pokemon) {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/pokemons/pokemon/${pokemon.id}`);
+        const { pokemon: fetchedPokemon, typeEffectiveness: effectiveness } = response.data;
+
+        setSelectedPokemon({
+          ...fetchedPokemon,
+          form: fetchedPokemon.form || "", // Ensure form is always a string
+        });
+        setTypeEffectiveness(effectiveness);
+      } catch (error) {
+        console.error("Error fetching Pokémon details:", error);
+      }
+    } else if (pokemon) {
+      setSelectedPokemon(pokemon);
+    }
     setModalState({ ...modalState, [type]: true });
   };
 
   const closeModal = (type: "info" | "create" | "edit") => {
     setSelectedPokemon(null);
+    setTypeEffectiveness({});
     setModalState({ ...modalState, [type]: false });
   };
 
@@ -132,6 +149,7 @@ const PokedexPage: React.FC = () => {
       {modalState.info && selectedPokemon && (
         <InformationPokedexCard
           pokemon={selectedPokemon}
+          typeEffectiveness={typeEffectiveness}
           onClose={() => closeModal("info")}
         />
       )}

@@ -114,7 +114,7 @@ const CreatePokemonForm: React.FC<CreatePokemonFormProps> = ({ onClose, onCreate
           name="nationalDex"
           value={formData.nationalDex}
           onChange={handleChange}
-          placeholder="National Dex"
+          placeholder="National Dex (Fakemons - 100,000) (Regional forms - same National Dex)"
           className="w-full p-2 mb-4 border rounded-md"
         />
         <input
@@ -196,7 +196,7 @@ const CreatePokemonForm: React.FC<CreatePokemonFormProps> = ({ onClose, onCreate
           name="generation"
           value={formData.generation}
           onChange={handleChange}
-          placeholder="Generation"
+          placeholder="Generation (FanGames use 10,001)"
           className="w-full p-2 mb-4 border rounded-md"
         />
 

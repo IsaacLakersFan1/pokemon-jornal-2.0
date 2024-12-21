@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { FaCrown, FaStar, FaRunning, FaSkull, FaCheck, FaTrash } from 'react-icons/fa';
+import { FaCrown, FaStar, FaRunning, FaSkull, FaCheck, FaTrash, FaInfoCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import API_BASE_URL from '../apiConfig';
+import InformationPokedexCard from './InformationPokedexCard';
 
 interface EventCardProps {
   eventId: number;
+  pokemonId: number; // Use Pokémon ID for fetching correct details
   pokemonName: string;
   pokemonImage: string | null;
   pokemonForm?: string;
@@ -20,6 +22,25 @@ interface EventCardProps {
   route: string;
   form: string;
   onDelete: () => void; // Delete callback
+}
+
+interface Pokemon {
+  id: number;
+  nationalDex: number;
+  name: string;
+  form: string | null;
+  type1: string;
+  type2?: string | null;
+  total: number;
+  hp: number;
+  attack: number;
+  defense: number;
+  specialAttack: number;
+  specialDefense: number;
+  speed: number;
+  generation: number;
+  image: string;
+  shinyImage: string;
 }
 
 const getTypeColor = (type: string): string => {
@@ -49,6 +70,7 @@ const getTypeColor = (type: string): string => {
 
 const EventCard: React.FC<EventCardProps> = ({
   eventId,
+  pokemonId, // Use this ID to fetch Pokémon details
   pokemonName,
   pokemonImage,
   type1,
@@ -65,7 +87,32 @@ const EventCard: React.FC<EventCardProps> = ({
   const [shiny, setShiny] = useState<number>(isShiny);
   const [champ, setChamp] = useState<number>(isChamp);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
+  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+  const [typeEffectiveness, setTypeEffectiveness] = useState<{ [key: string]: number }>({});
   const token = localStorage.getItem('authToken');
+
+  const fetchPokemonInfo = async () => {
+    if (!pokemonId) {
+      console.error('Pokemon ID is missing!');
+      toast.error('Pokemon ID is missing. Please try again.');
+      return;
+    }
+  
+    try {
+      const response = await axios.get(`${API_BASE_URL}/pokemons/pokemon/${pokemonId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const { pokemon, typeEffectiveness } = response.data;
+      setSelectedPokemon(pokemon);
+      setTypeEffectiveness(typeEffectiveness);
+      setIsInfoModalOpen(true);
+    } catch (error) {
+      console.error('Failed to fetch Pokémon info:', error);
+      toast.error('Failed to fetch Pokémon info. Please try again.');
+    }
+  };
+  
 
   const statusColors: Record<string, string> = {
     Catched: 'bg-green-100 border-green-400',
@@ -121,7 +168,7 @@ const EventCard: React.FC<EventCardProps> = ({
       });
       toast.success('Event deleted successfully.');
       setIsDeleteModalOpen(false);
-  
+
       // Call the onDelete callback to trigger refetch
       onDelete();
     } catch (error) {
@@ -129,7 +176,6 @@ const EventCard: React.FC<EventCardProps> = ({
       toast.error('Failed to delete event. Please try again.');
     }
   };
-  
 
   return (
     <>
@@ -220,12 +266,21 @@ const EventCard: React.FC<EventCardProps> = ({
             >
               <FaCrown className={champ ? 'text-yellow-600' : 'text-gray-600'} />
             </button>
-            <button
-              className="py-2 px-4 mt-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-              onClick={() => setIsDeleteModalOpen(true)}
-            >
-              <FaTrash />
-            </button>
+              <div>
+              {/* Information Button */}
+              <button
+                className="py-2 px-4 mt-2 mr-2.5 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                onClick={fetchPokemonInfo}
+              >
+                <FaInfoCircle />
+              </button>
+              <button
+                className="py-2 px-4 mt-2  bg-red-500 text-white rounded-md hover:bg-red-600"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                <FaTrash />
+              </button>
+              </div>
           </div>
         </div>
       </div>
@@ -253,6 +308,16 @@ const EventCard: React.FC<EventCardProps> = ({
           </div>
         </div>
       )}
+
+      {/* Information Modal */}
+      {isInfoModalOpen && selectedPokemon && (
+        <InformationPokedexCard
+          pokemon={selectedPokemon}
+          typeEffectiveness={typeEffectiveness}
+          onClose={() => setIsInfoModalOpen(false)}
+        />
+      )}
+      
     </>
   );
 };

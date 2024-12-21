@@ -43,7 +43,7 @@ const PlayersPage: React.FC = () => {
               pokemon: p.player.pokemon
                 ? {
                     name: p.player.pokemon.name,
-                    image: `/${p.player.pokemon.name.toLowerCase()}.png`,
+                    image: `http://localhost:3000/public/PokemonImages/${p.player.pokemon.name.toLowerCase()}.png`
                   }
                 : null,
             }))
@@ -95,7 +95,7 @@ const PlayersPage: React.FC = () => {
             <div className="flex flex-col items-center">
               {/* Player Image */}
               <img
-                src="/player.png"
+                src={`http://localhost:3000/public/PokemonImages/player.png`}
                 alt={`${player.name} avatar`}
                 className="w-16 h-32  mb-4 "
               />

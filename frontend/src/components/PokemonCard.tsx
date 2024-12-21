@@ -73,7 +73,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({
         ) : (
           // Display Pokémon image
           <img
-            src={`/${pokemonImage}.png`}
+            src={`http://localhost:3000/public/PokemonImages/${pokemonImage}.png`}
             alt={name}
             className="w-64 h-64"
           />
@@ -104,7 +104,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({
         <div className='flex items-center justify-center'>
             {/* Capture Count Section */}
                 <div className="flex items-center justify-center mt-6">
-                    <img src="/pokeball.png" alt="Pokéball" className="w-8 h-8 mr-2" />
+                    <img src={`http://localhost:3000/public/PokemonImages/pokeball.png`} alt="Pokéball" className="w-8 h-8 mr-2" />
                     <span className="text-lg font-bold">{timesCaptured}</span>
                 </div>
 

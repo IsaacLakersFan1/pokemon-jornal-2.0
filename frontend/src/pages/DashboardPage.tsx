@@ -288,6 +288,7 @@ const DashboardPage = () => {
                 {eventsByPlayer[playerId].map((event: any) => (
                   <EventCard
                     key={event.id}
+                    pokemonId={event.pokemonId}
                     eventId={event.id}
                     pokemonName={event.pokemon.name}
                     pokemonImage={event.pokemon.image}

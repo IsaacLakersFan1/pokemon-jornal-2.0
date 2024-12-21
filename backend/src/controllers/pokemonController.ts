@@ -10,9 +10,24 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, "../../public/PokemonImages")); // Save to "PokemonImages" folder inside public
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname); // Get file extension
-    const baseName = Date.now() + "-" + file.fieldname; // Use only the base name without extension
-    cb(null, `${baseName}${ext}`); // Save file with extension, but store only the base name in the DB
+    try {
+      const { name, form } = req.body; // Access Pokémon name and form from the request body
+      if (!name) {
+        return cb(new Error("Pokémon name is required for naming the file"), "");
+      }
+
+      // Normalize the Pokémon name
+      let lowerCaseName = name.toLowerCase().replace(/\s+/g, "-"); // Convert name to lowercase and replace spaces with dashes
+
+      // If form includes "Mega" or "mega," prefix the name with "mega-"
+      if (form && /mega/i.test(form)) {
+        lowerCaseName = `mega-${lowerCaseName}`;
+      }
+
+      cb(null, `${lowerCaseName}.png`); // Save file as 'name.png'
+    } catch (err: any) {
+      cb(err, "");
+    }
   },
 });
 
@@ -31,22 +46,48 @@ const upload = multer({ storage, fileFilter });
 // Create a new Pokémon
 export const createPokemon = async (req: Request, res: Response): Promise<void> => {
   // Handle the image upload via multer middleware
-  upload.single('image')(req, res, async (err) => {
+  upload.single("image")(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
 
-    const { nationalDex, name, form, type1, type2, hp, attack, defense, specialAttack, specialDefense, speed, generation } = req.body;
+    const {
+      nationalDex,
+      name,
+      form,
+      type1,
+      type2,
+      hp,
+      attack,
+      defense,
+      specialAttack,
+      specialDefense,
+      speed,
+      generation,
+    } = req.body;
 
     // Calculate total points
-    const total = parseInt(hp) + parseInt(attack) + parseInt(defense) + parseInt(specialAttack) + parseInt(specialDefense) + parseInt(speed);
-
-    // Generate image names
-    const lowerCaseName = name.toLowerCase();
-    const image = lowerCaseName;
-    const shinyImage = `${lowerCaseName}-shiny`;
+    const total =
+      parseInt(hp) +
+      parseInt(attack) +
+      parseInt(defense) +
+      parseInt(specialAttack) +
+      parseInt(specialDefense) +
+      parseInt(speed);
 
     try {
+      // Normalize the Pokémon name
+      let lowerCaseName = name.toLowerCase().replace(/\s+/g, "-"); // Replace spaces with dashes
+
+      // If form includes "Mega" or "mega," prefix the name with "mega-"
+      if (form && /mega/i.test(form)) {
+        lowerCaseName = `mega-${lowerCaseName}`;
+      }
+
+      // Use the normalized name for image and shiny image
+      const image = lowerCaseName;
+      const shinyImage = `${lowerCaseName}-shiny`;
+
       // Create Pokémon record in the DB
       const newPokemon = await prisma.pokemon.create({
         data: {
@@ -68,16 +109,12 @@ export const createPokemon = async (req: Request, res: Response): Promise<void> 
         },
       });
 
-      // If an image was uploaded, update the image field
-      if (req.file) {
-        const imageNameWithoutExtension = path.basename(req.file.filename, path.extname(req.file.filename));
-        newPokemon.image = imageNameWithoutExtension; // Save only the base name without extension
-      }
-
-      res.status(201).json({ message: 'Pokémon created successfully', pokemon: newPokemon });
+      res
+        .status(201)
+        .json({ message: "Pokémon created successfully", pokemon: newPokemon });
     } catch (error) {
-      console.error('Error creating Pokémon:', error);
-      res.status(500).json({ error: 'Failed to create Pokémon' });
+      console.error("Error creating Pokémon:", error);
+      res.status(500).json({ error: "Failed to create Pokémon" });
     }
   });
 };
@@ -108,8 +145,12 @@ export const getPokemonById = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    res.status(200).json({ pokemon });
+    // Calculate type effectiveness
+    const typeEffectivenessData = calculateEffectiveness(pokemon.type1, pokemon.type2);
+
+    res.status(200).json({ pokemon, typeEffectiveness: typeEffectivenessData });
   } catch (error) {
+    console.error('Error fetching Pokémon:', error);
     res.status(500).json({ error: 'Failed to fetch Pokémon' });
   }
 };
@@ -186,4 +227,54 @@ export const deletePokemon = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete Pokémon' });
   }
+};
+
+
+// Type Effectiveness Chart
+const typeEffectiveness: { [key: string]: { [key: string]: number } } = {
+  Normal: { Rock: 0.5, Steel: 0.5, Ghost: 0 },
+  Fire: { Grass: 2, Ice: 2, Bug: 2, Steel: 2, Fire: 0.5, Water: 0.5, Rock: 0.5, Dragon: 0.5 },
+  Water: { Fire: 2, Ground: 2, Rock: 2, Water: 0.5, Grass: 0.5, Dragon: 0.5 },
+  Grass: {
+    Water: 2,
+    Ground: 2,
+    Rock: 2,
+    Fire: 0.5,
+    Grass: 0.5,
+    Poison: 0.5,
+    Flying: 0.5,
+    Bug: 0.5,
+    Dragon: 0.5,
+    Steel: 0.5,
+  },
+  Electric: { Water: 2, Flying: 2, Electric: 0.5, Grass: 0.5, Dragon: 0.5, Ground: 0 },
+  Ice: { Grass: 2, Ground: 2, Flying: 2, Dragon: 2, Fire: 0.5, Water: 0.5, Ice: 0.5, Steel: 0.5 },
+  Fighting: { Normal: 2, Ice: 2, Rock: 2, Dark: 2, Steel: 2, Poison: 0.5, Flying: 0.5, Psychic: 0.5, Bug: 0.5, Fairy: 0.5, Ghost: 0 },
+  Poison: { Grass: 2, Fairy: 2, Poison: 0.5, Ground: 0.5, Rock: 0.5, Ghost: 0.5, Steel: 0 },
+  Ground: { Fire: 2, Electric: 2, Poison: 2, Rock: 2, Steel: 2, Grass: 0.5, Bug: 0.5, Flying: 0 },
+  Flying: { Grass: 2, Fighting: 2, Bug: 2, Electric: 0.5, Rock: 0.5, Steel: 0.5 },
+  Psychic: { Fighting: 2, Poison: 2, Psychic: 0.5, Steel: 0.5, Dark: 0 },
+  Bug: { Grass: 2, Psychic: 2, Dark: 2, Fire: 0.5, Fighting: 0.5, Poison: 0.5, Flying: 0.5, Ghost: 0.5, Steel: 0.5, Fairy: 0.5 },
+  Rock: { Fire: 2, Ice: 2, Flying: 2, Bug: 2, Fighting: 0.5, Ground: 0.5, Steel: 0.5 },
+  Ghost: { Psychic: 2, Ghost: 2, Dark: 0.5, Normal: 0 },
+  Dragon: { Dragon: 2, Steel: 0.5, Fairy: 0 },
+  Dark: { Psychic: 2, Ghost: 2, Dark: 0.5, Fairy: 0.5 },
+  Steel: { Ice: 2, Rock: 2, Fairy: 2, Fire: 0.5, Water: 0.5, Electric: 0.5, Steel: 0.5 },
+  Fairy: { Fighting: 2, Dragon: 2, Dark: 2, Fire: 0.5, Poison: 0.5, Steel: 0.5 },
+};
+
+const calculateEffectiveness = (type1: string, type2?: string | null) => {
+  const effectiveness: { [key: string]: number } = {};
+
+  Object.keys(typeEffectiveness).forEach((attackingType) => {
+    let multiplier = typeEffectiveness[attackingType][type1] || 1;
+
+    if (type2) {
+      multiplier *= typeEffectiveness[attackingType][type2] || 1;
+    }
+
+    effectiveness[attackingType] = multiplier;
+  });
+
+  return effectiveness;
 };

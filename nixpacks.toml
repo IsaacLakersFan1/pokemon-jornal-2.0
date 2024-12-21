@@ -1,17 +1,10 @@
-providers = ["node"]
+[backend]
+working_directory = "backend"
+build = "npm install && npm run build"
+start = "npm start"
 
-[phases.build]
-commands = [
-  "cd backend && npm install && npm run build",
-  "cd frontend && npm install && npm run build"
-]
-
-[phases.start]
-dependsOn = ["build"]
-commands = [
-  "cd backend && npm run start &",    # Run backend in the background
-  "cd frontend && npm run preview -- --port 5173 &"   # Run frontend in the background as well
-]
-
-[variables]
-PORT = "3000"
+[frontend]
+working_directory = "frontend"
+build = "npm install && npm run build"
+# Remove the start command if using Coolify's static site option
+start = "npx serve -s dist"

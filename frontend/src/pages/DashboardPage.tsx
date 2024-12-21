@@ -35,6 +35,19 @@ const DashboardPage = () => {
   const token = localStorage.getItem('authToken');
   const { id } = useParams<{ id: string }>(); // Extract game ID
 
+    // Function to fetch events
+    const fetchEvents = async () => {
+      if (token && gameId) {
+        try {
+          const response = await axios.get(`${API_BASE_URL}/events/events?gameId=${gameId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setEvents(response.data.events);
+        } catch (error) {
+          console.error('Error fetching events:', error);
+        }
+      }
+    };
 
   // Fetch players on component mount
   useEffect(() => {
@@ -106,17 +119,9 @@ const DashboardPage = () => {
     }
   };
   
-
   // Fetch events for the current game
   useEffect(() => {
-    if (token && gameId) {
-      axios
-        .get(`${API_BASE_URL}/events/events?gameId=${gameId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => setEvents(response.data.events))
-        .catch((error) => console.error('Error fetching events:', error));
-    }
+    fetchEvents();
   }, [token, gameId,isSubmitting]);
 
     // Group events by player
@@ -174,7 +179,7 @@ const DashboardPage = () => {
                 >
                   {/* Pokémon Image */}
                   <img
-                    src={`/${pokemon.image}.png` || 'pokeball.png'}
+                    src={`http://localhost:3000/public/PokemonImages/${pokemon.image}.png`}
                     alt={pokemon.name}
                     className="w-16 h-16 rounded-full mr-3"
                   />
@@ -199,7 +204,7 @@ const DashboardPage = () => {
             <div>
               <p className='mx-6 text-2xl'>{selectedPokemon.name}</p>
               <img
-                src={`/${selectedPokemon.image}.png` || '/pokeball.png'}
+                src={`http://localhost:3000/public/PokemonImages/${selectedPokemon.image}.png`}
                 alt={selectedPokemon.name}
                 className="w-24 h-24 rounded-full my-4 mx-8"
               />
@@ -249,9 +254,6 @@ const DashboardPage = () => {
           </select>
         </div>
 
-
-
-
         {/* Submit Button */}
         <div className="text-center">
           <button
@@ -266,38 +268,47 @@ const DashboardPage = () => {
         </div>
       </div>
 
+
       {/* Display Events */}
-          <div className="mt-8">
-            <h2 className="text-2xl font-semibold mb-4">Game Events</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-              {Object.keys(eventsByPlayer).map((playerId) => (
-                <div key={playerId}>
-                  <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-                    {eventsByPlayer[playerId][0]?.player.name}
-                  </h3>
-                  <div className="space-y-4">
-                    {eventsByPlayer[playerId].map((event: any) => (
-                      <EventCard
-                        key={event.id}
-                        eventId={event.id}
-                        pokemonName={event.pokemon.name}
-                        pokemonImage={event.pokemon.image}
-                        type1={event.pokemon.type1}
-                        type2={event.pokemon.type2}
-                        totalStats={event.pokemon.total}
-                        nickname={event.nickname}
-                        status={event.status}
-                        isShiny={event.isShiny}
-                        isChamp={event.isChamp}
-                        route={event.route}
-                        form={event.pokemon.form}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
+      <div className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Game Events</h2>
+        <div
+          className={`grid grid-cols-1 ${
+            players.length === 2 ? 'md:grid-cols-2' : ''
+          } ${
+            players.length > 2 ? `md:grid-cols-${players.length}` : ''
+          } gap-4`}
+        >
+          {Object.keys(eventsByPlayer).map((playerId) => (
+            <div key={playerId}>
+              <h3 className="text-xl font-semibold text-indigo-600 mb-2">
+                {eventsByPlayer[playerId][0]?.player.name}
+              </h3>
+              <div className="space-y-4">
+                {eventsByPlayer[playerId].map((event: any) => (
+                  <EventCard
+                    key={event.id}
+                    eventId={event.id}
+                    pokemonName={event.pokemon.name}
+                    pokemonImage={event.pokemon.image}
+                    type1={event.pokemon.type1}
+                    type2={event.pokemon.type2}
+                    totalStats={event.pokemon.total}
+                    nickname={event.nickname}
+                    status={event.status}
+                    isShiny={event.isShiny}
+                    isChamp={event.isChamp}
+                    route={event.route}
+                    form={event.pokemon.form}
+                    onDelete={fetchEvents} // Pass the callback
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 };

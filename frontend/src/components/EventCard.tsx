@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { FaCrown, FaStar, FaRunning, FaSkull, FaCheck } from 'react-icons/fa';
+import { FaCrown, FaStar, FaRunning, FaSkull, FaCheck, FaTrash } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import API_BASE_URL from '../apiConfig';
 
 interface EventCardProps {
   eventId: number;
   pokemonName: string;
   pokemonImage: string | null;
-  pokemonForm?: string; // Optional form
+  pokemonForm?: string;
   type1: string;
   type2?: string | null;
   totalStats: number;
@@ -17,6 +19,7 @@ interface EventCardProps {
   isChamp: number;
   route: string;
   form: string;
+  onDelete: () => void; // Delete callback
 }
 
 const getTypeColor = (type: string): string => {
@@ -56,10 +59,12 @@ const EventCard: React.FC<EventCardProps> = ({
   isChamp,
   route,
   form,
+  onDelete,
 }) => {
   const [currentStatus, setCurrentStatus] = useState<string>(status);
   const [shiny, setShiny] = useState<number>(isShiny);
   const [champ, setChamp] = useState<number>(isChamp);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const token = localStorage.getItem('authToken');
 
   const statusColors: Record<string, string> = {
@@ -78,8 +83,10 @@ const EventCard: React.FC<EventCardProps> = ({
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCurrentStatus(newStatus);
+      toast.success(`Status updated to "${newStatus}" successfully.`);
     } catch (error) {
       console.error('Failed to update status:', error);
+      toast.error('Failed to update status. Please try again.');
     }
   };
 
@@ -94,116 +101,159 @@ const EventCard: React.FC<EventCardProps> = ({
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      attribute === 'isShiny' ? setShiny(value) : setChamp(value);
+      if (attribute === 'isShiny') {
+        setShiny(value);
+        toast.success(value ? 'Marked as Shiny!' : 'Unmarked as Shiny.');
+      } else {
+        setChamp(value);
+        toast.success(value ? 'Marked as Champion!' : 'Unmarked as Champion.');
+      }
     } catch (error) {
       console.error(`Failed to update ${attribute}:`, error);
+      toast.error(`Failed to update ${attribute}. Please try again.`);
     }
   };
 
+  const handleDeleteEvent = async () => {
+    try {
+      await axios.delete(`${API_BASE_URL}/events/${eventId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Event deleted successfully.');
+      setIsDeleteModalOpen(false);
+  
+      // Call the onDelete callback to trigger refetch
+      onDelete();
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      toast.error('Failed to delete event. Please try again.');
+    }
+  };
+  
+
   return (
-    <div
-      className={`border rounded-md p-4 shadow-md flex w-full justify-between items-center ${
-        statusColors[currentStatus] || 'bg-white'
-      }`}
-    >
-
-      {/* First Block */}
-      <div>
-        {/* Pokémon Image */}
-        <img
-          src={`/${pokemonImage}.png` || '/pokeball.png'}
-          alt={pokemonName}
-          className="w-20 h-20 mx-auto object-contain mb-2"
-        />
-        {/* Type Badges */}
-        <div className="flex justify-center space-x-2 mt-2 ">
-        <span
-          className="px-2 py-1 rounded-full text-white text-xs font-semibold"
-          style={{ backgroundColor: getTypeColor(type1) }}
-        >
-          {type1}
-        </span>
-        {type2 && (
-          <span
-            className="px-2 py-1 rounded-full text-white text-xs font-semibold"
-            style={{ backgroundColor: getTypeColor(type2) }}
-          >
-            {type2}
-          </span>
-        )}
-      </div>
-      </div>
-
-      {/* Second Block */}
-      <div className=''>
-        {/* Nickname */}
-        {nickname && <p className="text-center text-sm font-bold italic">"{nickname}"</p>}
-
-        {/* Pokémon Name */}
-        <h3 className="text-md text-center">{pokemonName}</h3>
-
-        {/* Pokémon Form (if exists) */}
-        {form && (
-        <p className="text-center text-xs text-gray-500">{form}</p>
-        )}
-
-      </div>
-
-      {/* Third Block */}
-      <div className=''>
-        <h3 className="text-md font-bold text-center">{route}</h3>
-      </div>
-      
-      {/* Forth Block */}
-        <div className=''>
-          {/* Status Buttons */}
-            <div className="flex flex-col justify-between">
-              <button
-                className={`px-8 py-2 mb-2 rounded-md ${
-                  currentStatus === 'Catched' ? activeStatusColor : 'bg-white'
-                }`}
-                onClick={() => handleStatusChange('Catched')}
+    <>
+      <div
+        className={`border rounded-md p-4 shadow-md flex w-full justify-between items-center ${
+          statusColors[currentStatus] || 'bg-white'
+        }`}
+      >
+        {/* First Block */}
+        <div>
+          <img
+            src={`http://localhost:3000/public/PokemonImages/${pokemonImage}.png`}
+            alt={pokemonName}
+            className="w-20 h-20 mx-auto object-contain mb-2"
+          />
+          <div className="flex justify-center space-x-2 mt-2">
+            <span
+              className="px-2 py-1 rounded-full text-white text-xs font-semibold"
+              style={{ backgroundColor: getTypeColor(type1) }}
+            >
+              {type1}
+            </span>
+            {type2 && (
+              <span
+                className="px-2 py-1 rounded-full text-white text-xs font-semibold"
+                style={{ backgroundColor: getTypeColor(type2) }}
               >
-                <FaCheck className="text-green-600" />
+                {type2}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Second Block */}
+        <div>
+          {nickname && <p className="text-center text-sm font-bold italic">"{nickname}"</p>}
+          <h3 className="text-md text-center">{pokemonName}</h3>
+          {form && <p className="text-center text-xs text-gray-500">{form}</p>}
+        </div>
+
+        {/* Third Block */}
+        <div>
+          <h3 className="text-md font-bold text-center">{route}</h3>
+        </div>
+
+        {/* Fourth Block */}
+        <div>
+          <div className="flex flex-col justify-between">
+            <button
+              className={`px-8 py-2 mb-2 rounded-md ${
+                currentStatus === 'Catched' ? activeStatusColor : 'bg-white'
+              }`}
+              onClick={() => handleStatusChange('Catched')}
+            >
+              <FaCheck className="text-green-600" />
+            </button>
+            <button
+              className={`px-8 py-2 mb-2 rounded-md ${
+                currentStatus === 'Run Away' ? activeStatusColor : 'bg-white'
+              }`}
+              onClick={() => handleStatusChange('Run Away')}
+            >
+              <FaRunning className="text-gray-600" />
+            </button>
+            <button
+              className={`px-8 py-2 rounded-md ${
+                currentStatus === 'Defeated' ? activeStatusColor : 'bg-white'
+              }`}
+              onClick={() => handleStatusChange('Defeated')}
+            >
+              <FaSkull className="text-red-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* Fifth Block */}
+        <div>
+          <div className="flex flex-col h-28 justify-between items-center">
+            <button
+              className={`py-2 px-6 rounded-md ${shiny ? 'bg-yellow-300' : 'bg-gray-200'}`}
+              onClick={() => toggleAttribute('isShiny', shiny ? 0 : 1)}
+            >
+              <FaStar className={shiny ? 'text-yellow-600' : 'text-gray-600'} />
+            </button>
+            <button
+              className={`py-2 px-6 rounded-md ${champ ? 'bg-yellow-300' : 'bg-gray-200'}`}
+              onClick={() => toggleAttribute('isChamp', champ ? 0 : 1)}
+            >
+              <FaCrown className={champ ? 'text-yellow-600' : 'text-gray-600'} />
+            </button>
+            <button
+              className="py-2 px-4 mt-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              onClick={() => setIsDeleteModalOpen(true)}
+            >
+              <FaTrash />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+            <p className="text-gray-700 mb-6">Are you sure you want to delete this event?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
               </button>
               <button
-                className={`px-8 py-2 mb-2 rounded-md ${
-                  currentStatus === 'Run Away' ? activeStatusColor : 'bg-white'
-                }`}
-                onClick={() => handleStatusChange('Run Away')}
+                className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600"
+                onClick={handleDeleteEvent}
               >
-                <FaRunning className="text-gray-600" />
-              </button>
-              <button
-                className={`px-8 py-2 rounded-md ${
-                  currentStatus === 'Defeated' ? activeStatusColor : 'bg-white'
-                }`}
-                onClick={() => handleStatusChange('Defeated')}
-              >
-                <FaSkull className="text-red-600" />
+                Delete
               </button>
             </div>
+          </div>
         </div>
-
-      {/* Fifht Block */}
-      <div>
-        {/* Shiny and Champ Toggles */}
-        <div className="flex flex-col justify-center items-center mt-4">
-          <button
-            className={`py-2 px-6 mb-2 rounded-md ${shiny ? 'bg-yellow-300' : 'bg-gray-200'}`}
-            onClick={() => toggleAttribute('isShiny', shiny ? 0 : 1)}
-          >
-            <FaStar className={shiny ? 'text-yellow-600' : 'text-gray-600'} />
-          </button>
-          <button
-            className={`py-2 px-6 mt-2 rounded-md ${champ ? 'bg-yellow-300' : 'bg-gray-200'}`}
-            onClick={() => toggleAttribute('isChamp', champ ? 0 : 1)}
-          >
-            <FaCrown className={champ ? 'text-yellow-600' : 'text-gray-600'} />
-          </button>
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

@@ -7,11 +7,12 @@ import path from "path";
 // Set up Multer storage (save images to "public" folder)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../public")); // Save to "public" folder
+    cb(null, path.join(__dirname, "../../public/PokemonImages")); // Save to "PokemonImages" folder inside public
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname); // Get file extension
-    cb(null, `${Date.now()}-${file.fieldname}${ext}`); // Generate unique filename
+    const baseName = Date.now() + "-" + file.fieldname; // Use only the base name without extension
+    cb(null, `${baseName}${ext}`); // Save file with extension, but store only the base name in the DB
   },
 });
 
@@ -29,55 +30,58 @@ const upload = multer({ storage, fileFilter });
 
 // Create a new Pokémon
 export const createPokemon = async (req: Request, res: Response): Promise<void> => {
-  const { 
-    nationalDex, 
-    name, 
-    form, 
-    type1, 
-    type2, 
-    total, 
-    hp, 
-    attack, 
-    defense, 
-    specialAttack, 
-    specialDefense, 
-    speed, 
-    generation 
-  } = req.body;
+  // Handle the image upload via multer middleware
+  upload.single('image')(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
 
-  try {
-    // Generate the image and shinyImage fields based on the name
+    const { nationalDex, name, form, type1, type2, hp, attack, defense, specialAttack, specialDefense, speed, generation } = req.body;
+
+    // Calculate total points
+    const total = parseInt(hp) + parseInt(attack) + parseInt(defense) + parseInt(specialAttack) + parseInt(specialDefense) + parseInt(speed);
+
+    // Generate image names
     const lowerCaseName = name.toLowerCase();
     const image = lowerCaseName;
     const shinyImage = `${lowerCaseName}-shiny`;
 
-    // Create Pokémon with the generated image fields
-    const newPokemon = await prisma.pokemon.create({
-      data: {
-        nationalDex,
-        name,
-        form,
-        type1,
-        type2,
-        total,
-        hp,
-        attack,
-        defense,
-        specialAttack,
-        specialDefense,
-        speed,
-        generation,
-        image,        // Auto-filled field
-        shinyImage,   // Auto-filled field
-      },
-    });
+    try {
+      // Create Pokémon record in the DB
+      const newPokemon = await prisma.pokemon.create({
+        data: {
+          nationalDex: parseInt(nationalDex),
+          name,
+          form,
+          type1,
+          type2,
+          total,
+          hp: parseInt(hp),
+          attack: parseInt(attack),
+          defense: parseInt(defense),
+          specialAttack: parseInt(specialAttack),
+          specialDefense: parseInt(specialDefense),
+          speed: parseInt(speed),
+          generation: parseInt(generation),
+          image,
+          shinyImage,
+        },
+      });
 
-    res.status(201).json({ message: 'Pokémon created successfully', pokemon: newPokemon });
-  } catch (error) {
-    console.error("Error creating Pokémon:", error);
-    res.status(500).json({ error: 'Failed to create Pokémon' });
-  }
+      // If an image was uploaded, update the image field
+      if (req.file) {
+        const imageNameWithoutExtension = path.basename(req.file.filename, path.extname(req.file.filename));
+        newPokemon.image = imageNameWithoutExtension; // Save only the base name without extension
+      }
+
+      res.status(201).json({ message: 'Pokémon created successfully', pokemon: newPokemon });
+    } catch (error) {
+      console.error('Error creating Pokémon:', error);
+      res.status(500).json({ error: 'Failed to create Pokémon' });
+    }
+  });
 };
+
 
 
 // Get all Pokémon
@@ -149,9 +153,10 @@ export const updatePokemon = async (req: Request, res: Response): Promise<void> 
         generation: parseInt(generation),
       };
 
-      // If a file was uploaded, update the image field
+      // If a file was uploaded, update the image field (save without extension)
       if (req.file) {
-        data.image = req.file.filename; // Save the image filename to DB
+        const imageNameWithoutExtension = path.basename(req.file.filename, path.extname(req.file.filename));
+        data.image = imageNameWithoutExtension; // Save only the name without the extension
       }
 
       const updatedPokemon = await prisma.pokemon.update({
@@ -166,6 +171,7 @@ export const updatePokemon = async (req: Request, res: Response): Promise<void> 
     }
   });
 };
+
 
 // Delete a Pokémon by ID
 export const deletePokemon = async (req: Request, res: Response): Promise<void> => {

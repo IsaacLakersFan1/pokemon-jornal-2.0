@@ -1,12 +1,12 @@
+[general]
+providers = ["node"]  # Explicitly specify the provider
+
 [backend]
 working_directory = "backend"
-build = "npm install && npm run build"
+build = "npm install && npm run build"  # Adjust as needed for your backend
 start = "npm start"
 
 [frontend]
 working_directory = "frontend"
-build = "npm install && npm run build"
-start = "npx serve -s dist"  # Optional if Coolify serves static files
-
-[general]
-framework = "node"  # Specify the framework explicitly (e.g., Node.js for backend/frontend)
+build = "npm install && npm run build"  # Vite build command
+start = "npx serve -s dist"             # Optional for static sites
